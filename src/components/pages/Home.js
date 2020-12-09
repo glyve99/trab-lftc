@@ -15,14 +15,18 @@ export default function Home() {
 
     return (
         <Container maxWidth='sm' style={styles.container}>
+            <p style={styles.text}>
+                Trabalho: Linguagens Formais e Teoria da Computação 
+            </p>
             {renderRedirect()}
             <div style={styles.menu}>
-                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', padding: '15px 0 15px 0'}}>
-                    <Button onClick={() => setRedirectFlag('regex')}>Expressões regulares</Button>
-                    <Button>Gramáticas</Button>
-                    <Button onClick={() => setRedirectFlag('autofin')}>Autômatos finitos</Button>
-                </div>
+                <Button style={styles.button} onClick={() => setRedirectFlag('regex')}>Expressões regulares</Button>
+                <Button style={styles.button}>Gramáticas</Button>
+                <Button style={styles.button} onClick={() => setRedirectFlag('autofin')}>Autômatos finitos</Button>
             </div>
+            <p style={styles.text}>
+                Desenvolvido por: Giovanna Carreira Marinho e Guilherme Molina de Olyveira
+            </p>
         </Container>
     )
 }
@@ -33,11 +37,22 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        flexDirection: 'column'
     },
     menu: {
-        height: '75%',
+        height: '70%',
         width: '50%',
-        backgroundColor: 'pink',
-        borderRadius: '5%'
+        display: 'flex',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        flexDirection: 'column'
+    },
+    text: {
+        fontSize: '15px',
+        textAlign: 'center'
+    },
+    button: {
+        fontSize: '20px',
+        fontStyle: 'none'
     }
 }
