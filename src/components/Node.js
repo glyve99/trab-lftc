@@ -3,7 +3,7 @@ import { ArcherElement } from 'react-archer';
 
 export default function Node(props) {
 
-    const { index, x, y, update } = props;
+    const { index, x, y, update, relations } = props;
 
     const [coords, setCoords] = useState({x,y});
 
@@ -31,9 +31,19 @@ export default function Node(props) {
         }
     }
 
+    console.log(relations);
     return (
         <ArcherElement
             id={index}
+            relations={relations.map(r => {
+                const relation = {
+                    targetId: r,
+                    targetAnchor: 'right',
+                    sourceAnchor: 'left',
+                    style: { strokeDasharray: '5,5' }
+                };
+                return relation;
+            })}
             relations={[
                 {
                     targetId: '0',
@@ -44,7 +54,7 @@ export default function Node(props) {
             ]}
         >
             <div draggable onDragEnd={(event) => onDrop(event)} style={styles.node}>
-                oi
+                {index}
             </div>
         </ArcherElement>
     )
