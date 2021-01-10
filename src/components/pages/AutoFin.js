@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Node from '../../components/Node';
 import { ArcherContainer, ArcherElement } from 'react-archer';
+import TextField from '@material-ui/core/TextField/TextField';
+import Button from '@material-ui/core/Button/Button';
 
 export default function AutoFin() {
 
+    const [input, setInput] = useState({ id: '', targetId: '' });
     const [nodes, setNodes] = useState([]);
+    const [relations, setRelations] = useState([]);
 
     const updateNodes = e => {
         let flag = true;
@@ -23,7 +27,6 @@ export default function AutoFin() {
                 bottomLim: e.clientY + 25
             };
             setNodes([ ...nodes, node ]);
-            console.log(nodes.length);
         }
     }
 
@@ -36,9 +39,7 @@ export default function AutoFin() {
             upperLim: y - 25,
             bottomLim: y + 25
         };
-        console.log(updatedNode);
         const newArr = nodes.map((node, i) => i === index ? updatedNode : node);
-        console.log(newArr);
         setNodes(newArr);
     } 
 
@@ -53,13 +54,37 @@ export default function AutoFin() {
             window.removeEventListener("click", updateNodes);
             window.removeEventListener("keydown", keyDownHandler);
         }
-    }, [nodes]);
+    }, [nodes, relations]);
 
     return (
         <div style={{height: '100vh', width: '100%'}}>
+            <div style={{ height: '10%', backgroundColor: 'green' }}>
+                <TextField
+                    label='Id'
+                    value={input.id}
+                    onChange={e => setInput({ ...input, id: e.target.value })}
+                />
+                <TextField
+                    label='Target id'
+                    value={input.targetId}
+                    onChange={e => setInput({ ...input, targetId: e.target.value })}
+                />
+                <Button variant='contained' color='primary' onClick={() => {
+                    const relation = { id: input.id, targetId: input.targetId };
+                    setRelations([ ...relations, relation ]);
+                    console.log(relations);
+                }}>Submit</Button>
+            </div>
             <ArcherContainer strokeColor='red'>
                 {nodes.map((node, i) => (
-                <Node key={i} index={i} x={node.x} y={node.y} update={updateNodeCallback} />
+                <Node
+                    key={i}
+                    index={i}
+                    x={node.x}
+                    y={node.y}
+                    update={updateNodeCallback}
+                    relations={relations.filter(r => r.id === i).map(r => r.targetId)}
+                />
                 ))}
             </ArcherContainer>
         </div>
