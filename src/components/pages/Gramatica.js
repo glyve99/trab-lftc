@@ -1,69 +1,68 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Container from '@material-ui/core/Container/Container';
-import TableContainer from '@material-ui/core/TableContainer';
-import Table from '@material-ui/core/Table';
-import TableHead from '@material-ui/core/TableHead';
-import TableBody from '@material-ui/core/TableBody';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
-import TextField from '@material-ui/core/TextField';
-import { ArrowDownwardOutlined } from '@material-ui/icons';
+import Button from '@material-ui/core/Button/Button';
+import { ArrowForward } from '@material-ui/icons';
+import Typography from '@material-ui/core/Typography';
+import Tooltip from "@material-ui/core/Tooltip";
+import { withStyles } from '@material-ui/core/styles';
+import Divider from '@material-ui/core/Divider';
+
+import RemoveOutlinedIcon from '@material-ui/icons/RemoveOutlined';
+import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 const GrammarInput = ({ leftSide, rightSide }) => {
 
     const [inputs, setInputs] = useState([leftSide, rightSide]);
 
     return (
-        <TableRow style={{ borderBottom: '2px solid black', height: '80px' }}>
-            <TableCell style={{ borderRight: '1px solid black', width: '10%' }}>
-                <input 
-                    value={inputs[0]}
-                    style={{ backgroundColor: '#DFDBDB', border: 0, outline: 'none', width: '100%', fontSize: 20, textAlign: 'center' }}
-                    onChange={e => setInputs([ e.target.value.toUpperCase(), inputs[1] ])}
-                    maxLength={1}
-                />
-            </TableCell>
-            <TableCell style={{ borderRight: '1px solid black', width: '10%' }}>
-                >
-            </TableCell>
-            <TableCell style={{ width: '80%' }}>
-                <input 
-                    value={inputs[1]}
-                    style={{ backgroundColor: '#DFDBDB', border: 0, outline: 'none', width: '100%', fontSize: 20 }}
-                    onChange={e => setInputs([ inputs[0], e.target.value ])}
-                />
-            </TableCell>
-        </TableRow>
+        <div style={styles.item}>
+            <input 
+                value={inputs[0]}
+                style={styles.input}
+                onChange={e => setInputs([ e.target.value.toUpperCase(), inputs[1] ])}
+                maxLength={1}
+                placeholder="LHS"
+            />
+
+            <ArrowForward color="action"/>
+
+            <input 
+                id='insertLambda'
+                value={inputs[1]}
+                style={styles.input}
+                onChange={e => setInputs([ inputs[0], e.target.value ])}
+                placeholder="RHS"
+            />
+
+            <Button style={styles.button} onClick={() => {
+                const textarea = document.getElementById('insertLambda');
+                const insertStartPoint = textarea.selectionStart;
+                const insertEndPoint = textarea.selectionEnd;
+                let value = textarea.value;
+             
+                value = value.slice(0, insertStartPoint) + 'λ' + value.slice(insertEndPoint);
+                textarea.value = value;
+            }} ><p>λ</p></Button >
+        </div>
     )
 
-}
-
-const StringInput = ({ validate }) => {
-    const [value, setValue] = useState('');
-
-    return (
-        <TextField
-            variant='outlined'
-            label='Input:' 
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            style={{ width: '50%', }}
-            color={validate(value) ? 'primary' : 'secondary'}
-        />
-    )
 }
 
 export default function Gramatica() {
 
     const [grammarInputs, setGrammarInputs] = useState([
         { leftSide: 'S', rightSide: 'a | bc | baaA' },
-        { leftSide: 'A', rightSide: 'aA | bB' },
-        { leftSide: 'B', rightSide: 'c' },
-        { leftSide: '', rightSide: '' }
+        { leftSide: 'A', rightSide: 'aA | bB | λ' },
+        { leftSide: 'B', rightSide: 'c' }
     ]);
-    const [stringInputs, setStringInputs] = useState(1);
+    const [inputs, setInputs] = useState([1]);
+    const [userInput, setUserInput] = useState('');
 
-    const validate = str => {
+    const validate = strInput => {
+        const str = strInput.target.value;   
         const arr = grammarInputs.map(input => {
             const temp = { ...input };
             temp.rightSide = temp.rightSide.replace(/\s+/g, '').split('|');
@@ -90,141 +89,240 @@ export default function Gramatica() {
                 }
             })
         });
-        if(res.filter(s => s === 'Left').length === 0){
+        console.log(res);
+        
+        if(res.filter(s => s === 'Right').length === res.length){
             type = 'Right';
-        } else if(res.filter(s => s === 'Right').length === 0){
+        } else if(res.filter(s => s === 'Left').length === res.length){
             type = 'Left';
         } else {
             type = 'Invalid';
         };
-
+        console.log('String: ', str);
+        
         if(type === 'Right'){
-            arr[0].rightSide.forEach(rule => {
+            console.log('Grammar type: ', type);
+            
+            for(let rule of arr[0].rightSide)
+            {
                 if(matchD(str, rule, arr)){
-                    console.log('oi');
-                    return true;
+                    strInput.target.style.borderColor = "ForestGreen";
+                    return;
                 };
-            });
-            return false;
+            }
+            strInput.target.style.borderColor = "FireBrick";
         } else if(type === 'Left'){
-            arr[0].rightSide.forEach(rule => {
+            console.log('Grammar type: ', type);
+            
+            for(let rule of arr[0].rightSide)
+            {
                 if(matchE(str, rule, arr)){
-                    return true;
+                    strInput.target.style.borderColor = "ForestGreen";
+                    return;
                 };
-            });
-            return false;
+            }
+            strInput.target.style.borderColor = "FireBrick";
         } else {
-            return false;
+            console.log('Error: Invalid Grammar type! Accepted grammars: GLD, GLUD, GLE, GLUE.');
+            return;
         }
-
+        return;
     };
 
     const matchD = (str, rule, arr) => {
+        console.log('Rule: ', rule);
         if(rule.length - 1 > str.length) return false;
+
         const nextRule = rule[rule.length - 1];
-        console.log(rule === str);
+        console.log('  Next rule: ', nextRule);
+
+        //Verificando caractere vazio
+        if(nextRule === 'λ' && (rule.slice(0, rule.length - 1) === str && rule.slice(0, rule.length - 1).length === str.length)) return true;
+        
         if(nextRule === nextRule.toLowerCase()) return rule === str;
+        
         const rules = arr.find(row => row.leftSide === nextRule);
+        console.log('  Rules: ', rules.rightSide);
+
         if(!rules) return false;
-        rules.rightSide.forEach(r => {
+        for(let r of rules.rightSide)
+        {
             if(matchD(str, rule.replace(nextRule, r), arr)){
                 return true;
             }
-        });
+        }
     };
 
     const matchE = (str, rule, arr) => {
+        console.log('Rule: ', rule);
         if(rule.length - 1 > str.length) return false;
+
         const nextRule = rule[0];
+        console.log('  NextRule: ', nextRule);
+
+        //Verificando caractere vazio
+        if(nextRule === 'λ' && (rule.slice(1, rule.length) === str && rule.slice(1, rule.length).length === str.length)) return true;
+        
         if(nextRule === nextRule.toLowerCase()) return rule === str;
+
         const rules = arr.find(row => row.leftSide === nextRule);
+        console.log('  Rules: ', rules.rightSide);
+
         if(!rules) return false;
-        rules.rightSide.forEach(r => {
+        for(let r of rules.rightSide)
+        {
             if(matchE(str, rule.replace(nextRule, r), arr)){
                 return true;
             }
-        })
-    }
-
-    const renderInputs = () => {
-        let arr = [];
-        for(let i=0; i<stringInputs; i++){
-            arr.push(<StringInput validate={validate} />);
         }
-        return arr;
     }
+  
     return (
         <Container maxWidth='lg' style={styles.container}>
-            <div style={{ ...styles.innerContainer }}>
-                <button
-                    onClick={() => setGrammarInputs([ ...grammarInputs, { leftSide: '', rightSide: '' } ])}
-                >add more</button>
-                <TableContainer style={{ height: '75%', width: '75%' }}>
-                    <Table style={styles.table}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>
-                                    LHS
-                                </TableCell>
-                                <TableCell>
+            <header style={styles.header}>
+                <Link style={styles.button} to="/" width="20px" height="40px">
+                    <Tooltip title="Voltar"><Button style={styles.button}><ArrowBackIcon color="action"/></Button></Tooltip>
+                </Link>
+                
+                <p style={styles.text}>Gramática regular</p>
+            </header>
 
-                                </TableCell>
-                                <TableCell>
-                                    RHS
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {grammarInputs.map(input => (
-                                <GrammarInput leftSide={input.leftSide} rightSide={input.rightSide} />
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </div>
-            <div style={styles.innerContainer}>
-                <div style={{ height: '75%', width: '75%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    {renderInputs()}
+            <div style={{width: '100%' }}>
+                <div style={{width: '50%', float: 'left' }}>
+                    <div style={styles.main}>
+                        {grammarInputs.map(input => (
+                            <GrammarInput leftSide={input.leftSide} rightSide={input.rightSide} />
+                        ))}
+                    </div>   
+                    <div style={styles.footer}>
+                        <Tooltip title="Adicionar regra">
+                            <Button style={styles.button} onClick={() => {
+                                if(grammarInputs.length < 20)
+                                    setGrammarInputs([ ...grammarInputs, { leftSide: '', rightSide: '' } ])
+                                }}
+                                > <AddOutlinedIcon color="action"/> </Button >
+                        </Tooltip>
+                        <Tooltip title="Remover regra">
+                            <Button style={styles.button} onClick={() => {
+                                if(grammarInputs.length > 1)
+                                    setGrammarInputs(grammarInputs.slice(0, grammarInputs.length-1))
+                                }} > <RemoveOutlinedIcon color="action" /> </Button >
+                        </Tooltip>
+                    </div>
                 </div>
-                <button
-                    onClick={() => {
-                        if(stringInputs < 10){
-                            setStringInputs(stringInputs + 2);
-                        }
-                    }}
-                >add more</button>
+
+                <Divider color="inherit" orientation="vertical" style={{ padding: '0.5px', height: '100%', float: 'left' }} />
+
+                <div style={{width: '45%', float: 'left' }}>
+                    <div style={styles.main}>
+                        {inputs.map(() => (
+                            <div style={styles.item}>
+                                <input type="text" placeholder="String" onChange={(strInput) => validate(strInput)} onClick={(strInput) => {validate(strInput); strInput.target.placeholder = "";}} style={styles.input}/>
+                            </div>
+                        ))}
+                    </div>
+                    <div style={styles.footer}>
+                        <Tooltip title="Adicionar">
+                            <Button style={styles.button} onClick={() => {
+                                if(inputs.length < 10)
+                                    setInputs([...inputs, 1])
+                                }} > <AddOutlinedIcon color="action"/> </Button >
+                        </Tooltip>
+                        <Tooltip title="Remover">
+                            <Button style={styles.button} onClick={() => {
+                                if(inputs.length > 1)
+                                    setInputs(inputs.slice(0, inputs.length-1))
+                                }} > <RemoveOutlinedIcon color="action" /> </Button >
+                        </Tooltip>
+                    </div>
+                </div>
             </div>
+
+            <div style={styles.helper}>            
+                <HtmlTooltip placement="top"
+                    title={
+                    <React.Fragment>
+                        <Typography  color="inherit">Gramática regular</Typography>
+                        {'Insira as regras da gramática:'} <br/>
+                        <b>{'S -> a'}</b> {' | '} <b>{'bS'}</b> {' | '} <b>{' λ'}</b> <br/><br/>
+                        <b>{'ATENÇÃO!'}</b><br/> {'  Gramáticas aceitas: GLD, GLUD, GLE e GLUE.'} <br/>
+                        {'Em seguida, acrescente as strings para validar.'}                        
+                    </React.Fragment>
+                    }>
+                    <HelpOutlineIcon color="action" />
+                </HtmlTooltip>
+            </div>    
         </Container>
     )
 }
 
+const HtmlTooltip = withStyles((theme) => ({
+    tooltip: {
+      backgroundColor: '#f5f5f9',
+      color: 'rgba(0, 0, 0, 0.87)',
+      maxWidth: 420,
+      fontSize: theme.typography.pxToRem(12),
+      border: '1px solid #dadde9',
+    },
+  }))(Tooltip);
+
+
 const styles = {
     container: {
         height: '100vh',
-        display: 'flex'
-    },
-    innerContainer: {
-        width: '50%',
-        height: '100%',
         display: 'flex',
-        alignItems: 'center',
+        flexDirection: 'column',
         justifyContent: 'center'
     },
-    table: {
-        height: '100%',
-        width: '100%',
-        backgroundColor: '#DFDBDB',
-        borderRadius: 5
+    helper: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginRight: '10px'
     },
-    td: {
-        height: '100%',
-        borderBottom: '1px solid black'
+    button: {
+        borderRadius: '5px',
+        height: '30px',
+        width: '20px',
+        transitionDuration: '0.5s',
+        marginRight: '10px'
     },
-    grammarInput: {
-        height: '25%',
-        width: '50%',
-        border: 0,
-        backgroundColor: '#DFDBDB',
-        outline: 'none'
-    }
+    header:
+    {
+        paddingBottom: '15px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+    },
+    text: {
+        fontSize: '30px',
+        textAlign: 'center',
+        margin: '0'
+    },
+    footer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
+    main: {
+        paddingBottom: '20px',
+        margin: '0 auto',
+        display: 'flex',
+        flexFlow: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+    },
+    item: {
+        padding: '5px',
+    },
+    input: {
+        borderWidth: "3px", 
+        borderColor: "black",
+        borderStyle: "solid",
+        borderRadius: "5px",
+        height: "50px",
+        width: "200px",
+        outline: "0",
+        fontSize: "20px"
+     }
 }
