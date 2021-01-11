@@ -13,16 +13,19 @@ import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
-const GrammarInput = ({ leftSide, rightSide }) => {
-
+const GrammarInput = ({grammar, leftSide, rightSide , cont}) => {
     const [inputs, setInputs] = useState([leftSide, rightSide]);
-
+    
     return (
         <div style={styles.item}>
             <input 
                 value={inputs[0]}
-                style={styles.input}
-                onChange={e => setInputs([ e.target.value.toUpperCase(), inputs[1] ])}
+                style={styles.input2}
+                onChange={e => {
+                    setInputs([ e.target.value.toUpperCase(), inputs[1] ]);
+                    grammar[cont].leftSide = e.target.value.toUpperCase();
+                    grammar[cont].rightSide = inputs[1];
+                }}
                 maxLength={1}
                 placeholder="LHS"
             />
@@ -30,36 +33,42 @@ const GrammarInput = ({ leftSide, rightSide }) => {
             <ArrowForward color="action"/>
 
             <input 
-                id='insertLambda'
+                id={cont}
                 value={inputs[1]}
                 style={styles.input}
-                onChange={e => setInputs([ inputs[0], e.target.value ])}
+                onChange={e => {
+                    setInputs([ inputs[0], e.target.value ]);
+                    grammar[cont].leftSide = inputs[0];
+                    grammar[cont].rightSide = e.target.value;
+                }}
                 placeholder="RHS"
             />
 
-            <Button style={styles.button} onClick={() => {
-                const textarea = document.getElementById('insertLambda');
-                const insertStartPoint = textarea.selectionStart;
-                const insertEndPoint = textarea.selectionEnd;
-                let value = textarea.value;
-             
-                value = value.slice(0, insertStartPoint) + 'λ' + value.slice(insertEndPoint);
-                textarea.value = value;
-            }} ><p>λ</p></Button >
+            <Tooltip title="Adicionar caractere vazio: λ">
+                <Button id={cont} style={styles.button} onClick={(e) => {
+                    const buttonId = e.currentTarget.getAttribute('id');
+                    const textarea = document.getElementById(buttonId);
+                    
+                    let value = textarea.value;
+                    if (value.length === 0)
+                        textarea.value = 'λ';
+                    else
+                        textarea.value = value + ' | λ';
+                    grammar[cont].rightSide = textarea.value;
+                }} ><p style={{color: '#757575'}}>λ</p></Button >
+            </Tooltip>
         </div>
     )
-
 }
 
 export default function Gramatica() {
-
+    let cont = 0;
+    
     const [grammarInputs, setGrammarInputs] = useState([
-        { leftSide: 'S', rightSide: 'a | bc | baaA' },
-        { leftSide: 'A', rightSide: 'aA | bB | λ' },
-        { leftSide: 'B', rightSide: 'c' }
+        { leftSide: 'S', rightSide: 'aS | abB | B' },
+        { leftSide: 'B', rightSide: 'cB | λ' }
     ]);
     const [inputs, setInputs] = useState([1]);
-    const [userInput, setUserInput] = useState('');
 
     const validate = strInput => {
         const str = strInput.target.value;   
@@ -69,27 +78,31 @@ export default function Gramatica() {
             return temp;
         });
         const res = [];
-        console.log(arr);
+        console.log(grammarInputs);
         let type = '';
         arr.forEach(row => {
             row.rightSide.forEach(rule => {
-                if(rule.replace(/[^A-Z]/g, '').length > 1){
-                    res.push('Invalid');
-                } else {
-                    for(let i=0; i<rule.length; i++){
-                        if(rule[i] === rule[i].toUpperCase() && i === 0){
-                            res.push('Left');
-                            break;
-                        }
-                        if(rule[i] === rule[i].toUpperCase() && i === rule.length - 1){
-                            res.push('Right');
-                            break;
+                if(rule.length > 1)
+                {
+                    if(rule.replace(/[^A-Z]/g, '').length > 1){
+                        res.push('Invalid');
+                    } else {
+                        for(let i=0; i<rule.length; i++){
+                            if(rule[i] === rule[i].toUpperCase() && i === 0){
+                                res.push('Left');
+                                break;
+                            }
+                            if(rule[i] === rule[i].toUpperCase() && i === rule.length - 1){
+                                res.push('Right');
+                                break;
+                            }
                         }
                     }
                 }
             })
         });
-        console.log(res);
+
+        //console.log(res);
         
         if(res.filter(s => s === 'Right').length === res.length){
             type = 'Right';
@@ -98,10 +111,10 @@ export default function Gramatica() {
         } else {
             type = 'Invalid';
         };
-        console.log('String: ', str);
+        //console.log('String: ', str);
         
         if(type === 'Right'){
-            console.log('Grammar type: ', type);
+            //console.log('Grammar type: ', type);
             
             for(let rule of arr[0].rightSide)
             {
@@ -112,7 +125,7 @@ export default function Gramatica() {
             }
             strInput.target.style.borderColor = "FireBrick";
         } else if(type === 'Left'){
-            console.log('Grammar type: ', type);
+            //console.log('Grammar type: ', type);
             
             for(let rule of arr[0].rightSide)
             {
@@ -123,18 +136,19 @@ export default function Gramatica() {
             }
             strInput.target.style.borderColor = "FireBrick";
         } else {
-            console.log('Error: Invalid Grammar type! Accepted grammars: GLD, GLUD, GLE, GLUE.');
+            //console.log('Error: Invalid Grammar type! Accepted grammars: GLD, GLUD, GLE, GLUE.');
+            alert("Gramática inválida! Aceita apenas GLD, GLUD, GLE e GLUE!");
             return;
         }
         return;
     };
 
     const matchD = (str, rule, arr) => {
-        console.log('Rule: ', rule);
+        //console.log('Rule: ', rule);
         if(rule.length - 1 > str.length) return false;
 
         const nextRule = rule[rule.length - 1];
-        console.log('  Next rule: ', nextRule);
+        //console.log('  Next rule: ', nextRule);
 
         //Verificando caractere vazio
         if(nextRule === 'λ' && (rule.slice(0, rule.length - 1) === str && rule.slice(0, rule.length - 1).length === str.length)) return true;
@@ -142,7 +156,7 @@ export default function Gramatica() {
         if(nextRule === nextRule.toLowerCase()) return rule === str;
         
         const rules = arr.find(row => row.leftSide === nextRule);
-        console.log('  Rules: ', rules.rightSide);
+        //console.log('  Rules: ', rules.rightSide);
 
         if(!rules) return false;
         for(let r of rules.rightSide)
@@ -154,11 +168,11 @@ export default function Gramatica() {
     };
 
     const matchE = (str, rule, arr) => {
-        console.log('Rule: ', rule);
+        //console.log('Rule: ', rule);
         if(rule.length - 1 > str.length) return false;
 
         const nextRule = rule[0];
-        console.log('  NextRule: ', nextRule);
+        //console.log('  NextRule: ', nextRule);
 
         //Verificando caractere vazio
         if(nextRule === 'λ' && (rule.slice(1, rule.length) === str && rule.slice(1, rule.length).length === str.length)) return true;
@@ -166,7 +180,7 @@ export default function Gramatica() {
         if(nextRule === nextRule.toLowerCase()) return rule === str;
 
         const rules = arr.find(row => row.leftSide === nextRule);
-        console.log('  Rules: ', rules.rightSide);
+        //console.log('  Rules: ', rules.rightSide);
 
         if(!rules) return false;
         for(let r of rules.rightSide)
@@ -191,14 +205,14 @@ export default function Gramatica() {
                 <div style={{width: '50%', float: 'left' }}>
                     <div style={styles.main}>
                         {grammarInputs.map(input => (
-                            <GrammarInput leftSide={input.leftSide} rightSide={input.rightSide} />
+                            <GrammarInput grammar={grammarInputs} leftSide={input.leftSide} rightSide={input.rightSide} cont={cont++}/>
                         ))}
                     </div>   
                     <div style={styles.footer}>
                         <Tooltip title="Adicionar regra">
                             <Button style={styles.button} onClick={() => {
                                 if(grammarInputs.length < 20)
-                                    setGrammarInputs([ ...grammarInputs, { leftSide: '', rightSide: '' } ])
+                                    setGrammarInputs([ ...grammarInputs, { leftSide: '', rightSide: '' } ]);
                                 }}
                                 > <AddOutlinedIcon color="action"/> </Button >
                         </Tooltip>
@@ -245,8 +259,10 @@ export default function Gramatica() {
                         <Typography  color="inherit">Gramática regular</Typography>
                         {'Insira as regras da gramática:'} <br/>
                         <b>{'S -> a'}</b> {' | '} <b>{'bS'}</b> {' | '} <b>{' λ'}</b> <br/><br/>
-                        <b>{'ATENÇÃO!'}</b><br/> {'  Gramáticas aceitas: GLD, GLUD, GLE e GLUE.'} <br/>
-                        {'Em seguida, acrescente as strings para validar.'}                        
+                        <b>{'ATENÇÃO!'}</b><br/> {'  Gramáticas aceitas: GLD, GLUD, GLE e GLUE.'}
+                        <br/> {'  O símbolo de início, será o primeiro da lista de regras.'} <br/>
+                        <br/>{'Em seguida, acrescente as strings para validar.'} <br/>
+                        {'Elas serão validadas quando são clicadas.'}                        
                     </React.Fragment>
                     }>
                     <HelpOutlineIcon color="action" />
@@ -265,7 +281,6 @@ const HtmlTooltip = withStyles((theme) => ({
       border: '1px solid #dadde9',
     },
   }))(Tooltip);
-
 
 const styles = {
     container: {
@@ -324,5 +339,15 @@ const styles = {
         width: "200px",
         outline: "0",
         fontSize: "20px"
-     }
+     },
+     input2: {
+         borderWidth: "3px", 
+         borderColor: "black",
+         borderStyle: "solid",
+         borderRadius: "5px",
+         height: "50px",
+         width: "120px",
+         outline: "0",
+         fontSize: "20px"
+      }
 }
