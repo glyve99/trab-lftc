@@ -78,7 +78,7 @@ export default function Gramatica() {
             return temp;
         });
         const res = [];
-        console.log(grammarInputs);
+        //console.log(grammarInputs);
         let type = '';
         arr.forEach(row => {
             row.rightSide.forEach(rule => {
@@ -155,6 +155,9 @@ export default function Gramatica() {
         
         if(nextRule === nextRule.toLowerCase()) return rule === str;
         
+        //Verificando se pode continuar: só vai continuar se aB, ababaA = a, ababa. Quando for B, deve seguir para ver as outras regras dele
+        if(rule.length > 1 && rule.slice(0, rule.length - 1) !== str.slice(0, rule.length - 1)) return false;
+
         const rules = arr.find(row => row.leftSide === nextRule);
         //console.log('  Rules: ', rules.rightSide);
 
@@ -179,6 +182,9 @@ export default function Gramatica() {
         
         if(nextRule === nextRule.toLowerCase()) return rule === str;
 
+        //Verificando se pode continuar: só vai continuar se aB, ababaA = a, ababa. Quando for B, deve seguir para ver as outras regras dele
+        if(rule.length > 1 && rule.slice(1, rule.length) !== str.slice(str.length - (rule.length-1), str.length)) return false;
+        
         const rules = arr.find(row => row.leftSide === nextRule);
         //console.log('  Rules: ', rules.rightSide);
 
