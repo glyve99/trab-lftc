@@ -7,7 +7,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import TextField from '@material-ui/core/TextField';
-import { ArrowDownwardOutlined } from '@material-ui/icons';
 
 const GrammarInput = ({ leftSide, rightSide }) => {
 
@@ -43,7 +42,7 @@ const StringInput = ({ validate }) => {
 
     return (
         <TextField
-            variant='outlined'
+            variant='filled'
             label='Input:' 
             value={value}
             onChange={e => setValue(e.target.value)}
@@ -70,7 +69,6 @@ export default function Gramatica() {
             return temp;
         });
         const res = [];
-        console.log(arr);
         let type = '';
         arr.forEach(row => {
             row.rightSide.forEach(rule => {
@@ -90,9 +88,9 @@ export default function Gramatica() {
                 }
             })
         });
-        if(res.filter(s => s === 'Left').length === 0){
+        if(res.filter(s => s !== 'Right').length === 0){
             type = 'Right';
-        } else if(res.filter(s => s === 'Right').length === 0){
+        } else if(res.filter(s => s !== 'Left').length === 0){
             type = 'Left';
         } else {
             type = 'Invalid';

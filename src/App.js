@@ -6,6 +6,7 @@ import Regex from './components/pages/Regex';
 import Gramatica from './components/pages/Gramatica';
 import Test from './components/pages/Test';
 import Test2 from './components/pages/Test2';
+import Test3 from './components/pages/Test3';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path='/regex' component={Regex} />
         <Route path='/test' component={Test} />
         <Route path='/test2' component={Test2} />
+        <Route path='/test3' component={Test3} />
       </Switch>
     </BrowserRouter>
   );
