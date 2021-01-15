@@ -2,33 +2,26 @@ import React, { useState } from 'react';
 import { Graph } from 'react-d3-graph';
 import Button from '@material-ui/core/Button/Button';
 import Delete from '@material-ui/icons/Delete';
-import TextField from '@material-ui/core/TextField';
+import Tooltip from "@material-ui/core/Tooltip";
 
 import RemoveOutlinedIcon from '@material-ui/icons/RemoveOutlined';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 
-const StringInput = () => {
-    return (
-        <input 
-            style={{...styles.input, paddingTop: '5px'}}
-        />
-    )
-}
 
 export default function AutoFin() {
 
     const [nodes, setNodes] = useState([
         { id: 'q0', symbolType: 'diamond' },
         { id: 'q1', color: 'red' },
+        { id: 'q2', color: 'red' }
     ]);
     const [transitions, setTransitions] = useState([
-        { source: 'q0', target: 'q0', label: 'a' },
-        { source: 'q1', target: 'q1', label: 'b' },
+        { source: 'q0', target: 'q1', label: 'a' },
+        { source: 'q0', target: 'q2', label: 'b' },
     ]);
     const [transitionInput, setTransitionInput] = useState({ source: '', target: '', label: 'λ' });
-    const [stringInput, setStringInput] = useState('');
     const [deleteMode, setDeleteMode] = useState(false);
-    const [inputs, setInputs] = useState(1);
+    const [inputs, setInputs] = useState([1]);
 
     const myConfig = {
         nodeHighlightBehavior: true,
@@ -44,7 +37,8 @@ export default function AutoFin() {
         },
         link: {
           highlightColor: "lightblue",
-          renderLabel: true
+          renderLabel: true,
+          type: 'CURVE_SMOOTH'
         },
       };
 
@@ -68,18 +62,19 @@ export default function AutoFin() {
         else setTransitionInput({ source, target, label: transitions.find(t => t.source === source && t.target === target).label });
     };
 
-    const renderInputs = () => {
-        const arr = [];
-        for(let i=0; i<inputs; i++){
-            arr.push(<StringInput />);
-        }
-        return arr;
-    }
-
-    const validate = str => {
+    const validate = strInput => {
         let charCode = 65;
-        const tempTransitions = [...transitions];
-        let tempNodes = [ ...nodes ];
+        const str = strInput.target.value;
+        let tempTransitions = [];
+        let tempNodes = [];
+        transitions.forEach(tr => tempTransitions.push(Object.assign({}, tr)));
+        nodes.forEach(node => tempNodes.push(Object.assign({}, node)));
+        console.log({transitions});
+        console.log({nodes});
+        console.log({tempTransitions});
+        console.log({tempNodes});
+
+
         tempNodes = tempNodes.map(node => {
             const newValue = String.fromCharCode(charCode);
             tempTransitions.map(tr => {
@@ -94,11 +89,13 @@ export default function AutoFin() {
             charCode += 1;
             return node;
         });
+
+
         let grammar = [];
-        for(let i=0 ; i<transitions.length ; i++){
-            let initial = transitions[i].source;
-            let final = transitions[i].target;
-            let value = transitions[i].label;
+        for(let i=0 ; i < tempTransitions.length ; i++){
+            let initial = tempTransitions[i].source;
+            let final = tempTransitions[i].target;
+            let value = tempTransitions[i].label;
 
             let rules = grammar.find(row => row.leftSide === initial); 
 
@@ -111,10 +108,9 @@ export default function AutoFin() {
                 else rules.rightSide.push(value + final);
             };
         };
-        console.log(grammar);
-        for(let i=0 ; i<nodes.length ; i++){
-            let initial = nodes[i].id;
-            let type = nodes[i].type.find(row => row === 'final');
+        for(let i=0 ; i < tempNodes.length ; i++){
+            let initial = tempNodes[i].id;
+            let type = tempNodes[i].type.find(row => row === 'final');
             if(type){ //Se é final
                 let rules = grammar.find(row => row.leftSide === initial);
 
@@ -124,9 +120,9 @@ export default function AutoFin() {
                     rules.rightSide.push('λ');
             }
         }
-        for(let i=0 ; i<nodes.length ; i++){
-            let initial = nodes[i].id;
-            let type = nodes[i].type.find(row => row === 'initial');
+        for(let i=0 ; i<tempNodes.length ; i++){
+            let initial = tempNodes[i].id;
+            let type = tempNodes[i].type.find(row => row === 'initial');
 
             if(type){
                 let rules = grammar.find(row => row.leftSide === initial); //Verificando se existe regra com aquele simbolo
@@ -134,20 +130,23 @@ export default function AutoFin() {
                 grammar.unshift(rules);
             };
         };
+        console.log('Nodes:', nodes);
+        console.log('Transicoes:', transitions);
+        console.log('Temp nodes: ', tempNodes);
+        console.log('Temp transitions: ', tempTransitions);
         for(let rule of grammar[0].rightSide){
             if(matchD(str, rule, grammar)){
-                return true;
+                strInput.target.style.borderColor = "ForestGreen";
+                return;
             };
         }
-        return false;
+        strInput.target.style.borderColor = 'FireBrick';
     }
 
     const matchD = (str, rule, arr) => {
-        console.log('Rule: ', rule);
         if(rule.length - 1 > str.length) return false;
     
         const nextRule = rule[rule.length - 1];
-        console.log('  Next rule: ', nextRule);
     
         //Verificando caractere vazio
         if(nextRule === 'λ' && (rule.slice(0, rule.length - 1) === str && rule.slice(0, rule.length - 1).length === str.length)) return true;
@@ -155,7 +154,6 @@ export default function AutoFin() {
         if(nextRule === nextRule.toLowerCase()) return rule === str;
         
         const rules = arr.find(row => row.leftSide === nextRule);
-        console.log('  Rules: ', rules.rightSide);
     
         if(!rules) return false;
         for(let r of rules.rightSide)
@@ -166,6 +164,8 @@ export default function AutoFin() {
         }
     };
     
+    console.log(nodes);
+    console.log(transitions);
     return (
         <div style={{ height: '100vh' }}>
             <div style={{ height: '20%', borderBottom: '3px solid black' ,display: 'flex', justifyContent: 'space-between', padding: '0 2.5% 0 2.5%', alignItems: 'center' }}>
@@ -173,8 +173,11 @@ export default function AutoFin() {
                     <Button
                         variant='contained'
                         color='default'
-                        onClick={() => setNodes([ ...nodes, { id: `q${parseInt(nodes[nodes.length - 1].id[1]) + 1}` }])}
-                    >Adicionar nó</Button>
+                        onClick={() => {
+                            if(nodes.length > 0) setNodes([ ...nodes, { id: `q${parseInt(nodes[nodes.length - 1].id[1]) + 1}` }]);
+                            else setNodes([{ id: 'q0', symbolType: 'diamond' }]);
+                        }}
+                    >Adicionar estado</Button>
                 </div>
                 <div style={{ display: 'flex', height: '90%' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -226,19 +229,27 @@ export default function AutoFin() {
             </div>
             <div style={{ height: '80%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ width: '20%', height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        {renderInputs()}
-                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Button onClick={() => {
-                                if(inputs < 10) setInputs(inputs + 2);
-                            }}>
-                                <AddOutlinedIcon />
-                            </Button>
-                            <Button onClick={() => {
-                                if(inputs > 0) setInputs(inputs - 1);
-                            }}>
-                                <RemoveOutlinedIcon />
-                            </Button>
+                    <div style={{width: '45%', float: 'left' }}>
+                        <div style={styles.main}>
+                            {inputs.map(() => (
+                                <div style={styles.item}>
+                                    <input type="text" placeholder="String" onChange={(strInput) => validate(strInput)} onClick={(strInput) => {validate(strInput); strInput.target.placeholder = "";}} style={styles.input}/>
+                                </div>
+                            ))}
+                        </div>
+                        <div style={styles.footer}>
+                            <Tooltip title="Adicionar">
+                                <Button style={styles.button} onClick={() => {
+                                    if(inputs.length < 10)
+                                        setInputs([...inputs, 1])
+                                    }} > <AddOutlinedIcon color="action"/> </Button >
+                            </Tooltip>
+                            <Tooltip title="Remover">
+                                <Button style={styles.button} onClick={() => {
+                                    if(inputs.length > 1)
+                                        setInputs(inputs.slice(0, inputs.length-1))
+                                    }} > <RemoveOutlinedIcon color="action" /> </Button >
+                            </Tooltip>
                         </div>
                     </div>
                 </div>
@@ -266,5 +277,10 @@ const styles = {
         borderRadius: "5px",
         outline: "0",
         fontSize: "20px"
-    }
+    },
+    footer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
 };
