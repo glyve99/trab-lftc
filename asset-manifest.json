@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/trab-lftc/static/css/main.6dea0f05.chunk.css",
+    "main.js": "/trab-lftc/static/js/main.67c0f551.chunk.js",
+    "main.js.map": "/trab-lftc/static/js/main.67c0f551.chunk.js.map",
+    "runtime-main.js": "/trab-lftc/static/js/runtime-main.1a74f9da.js",
+    "runtime-main.js.map": "/trab-lftc/static/js/runtime-main.1a74f9da.js.map",
+    "static/js/2.3fd26cc8.chunk.js": "/trab-lftc/static/js/2.3fd26cc8.chunk.js",
+    "static/js/2.3fd26cc8.chunk.js.map": "/trab-lftc/static/js/2.3fd26cc8.chunk.js.map",
+    "static/js/3.cb69589f.chunk.js": "/trab-lftc/static/js/3.cb69589f.chunk.js",
+    "static/js/3.cb69589f.chunk.js.map": "/trab-lftc/static/js/3.cb69589f.chunk.js.map",
+    "index.html": "/trab-lftc/index.html",
+    "static/css/main.6dea0f05.chunk.css.map": "/trab-lftc/static/css/main.6dea0f05.chunk.css.map",
+    "static/js/2.3fd26cc8.chunk.js.LICENSE.txt": "/trab-lftc/static/js/2.3fd26cc8.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.1a74f9da.js",
+    "static/js/2.3fd26cc8.chunk.js",
+    "static/css/main.6dea0f05.chunk.css",
+    "static/js/main.67c0f551.chunk.js"
+  ]
+}
