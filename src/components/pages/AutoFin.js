@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 import { Graph } from 'react-d3-graph';
 import Button from '@material-ui/core/Button/Button';
 import Delete from '@material-ui/icons/Delete';
-import TextField from '@material-ui/core/TextField';
 
 import RemoveOutlinedIcon from '@material-ui/icons/RemoveOutlined';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 
 const StringInput = () => {
+    const [input, setInput] = useState('');
+
     return (
-        <input 
-            style={{...styles.input, paddingTop: '5px'}}
+        <input
+            placeholder='String'
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            style={{...styles.input, paddingTop: '15px' }}
         />
     )
 }
@@ -26,7 +30,6 @@ export default function AutoFin() {
         { source: 'q1', target: 'q1', label: 'b' },
     ]);
     const [transitionInput, setTransitionInput] = useState({ source: '', target: '', label: 'λ' });
-    const [stringInput, setStringInput] = useState('');
     const [deleteMode, setDeleteMode] = useState(false);
     const [inputs, setInputs] = useState(1);
 
@@ -226,7 +229,7 @@ export default function AutoFin() {
             </div>
             <div style={{ height: '80%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ width: '20%', height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div>
                         {renderInputs()}
                         <div style={{ display: 'flex', justifyContent: 'center' }}>
                             <Button onClick={() => {
@@ -235,7 +238,7 @@ export default function AutoFin() {
                                 <AddOutlinedIcon />
                             </Button>
                             <Button onClick={() => {
-                                if(inputs > 0) setInputs(inputs - 1);
+                                if(inputs > 1) setInputs(inputs - 1);
                             }}>
                                 <RemoveOutlinedIcon />
                             </Button>
