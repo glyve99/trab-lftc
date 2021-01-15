@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Graph } from 'react-d3-graph';
 import Button from '@material-ui/core/Button/Button';
 import Delete from '@material-ui/icons/Delete';
-import Tooltip from "@material-ui/core/Tooltip";
+import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
+import Divider from '@material-ui/core/Divider/Divider';
+import Container from '@material-ui/core/Container/Container';
+import { withStyles } from '@material-ui/core/styles';
 
 import RemoveOutlinedIcon from '@material-ui/icons/RemoveOutlined';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
-
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 export default function AutoFin() {
 
@@ -37,8 +43,7 @@ export default function AutoFin() {
         },
         link: {
           highlightColor: "lightblue",
-          renderLabel: true,
-          type: 'CURVE_SMOOTH'
+          renderLabel: true
         },
       };
 
@@ -56,11 +61,6 @@ export default function AutoFin() {
             }))
         }
     };
-      
-    const onClickLink = (source, target) => {
-        if(deleteMode) setTransitions(transitions.filter(t => t.source !== source || t.target !== target));
-        else setTransitionInput({ source, target, label: transitions.find(t => t.source === source && t.target === target).label });
-    };
 
     const validate = strInput => {
         let charCode = 65;
@@ -69,10 +69,6 @@ export default function AutoFin() {
         let tempNodes = [];
         transitions.forEach(tr => tempTransitions.push(Object.assign({}, tr)));
         nodes.forEach(node => tempNodes.push(Object.assign({}, node)));
-        console.log({transitions});
-        console.log({nodes});
-        console.log({tempTransitions});
-        console.log({tempNodes});
 
 
         tempNodes = tempNodes.map(node => {
@@ -130,10 +126,8 @@ export default function AutoFin() {
                 grammar.unshift(rules);
             };
         };
-        console.log('Nodes:', nodes);
-        console.log('Transicoes:', transitions);
-        console.log('Temp nodes: ', tempNodes);
-        console.log('Temp transitions: ', tempTransitions);
+        console.log(transitions);
+        console.log(grammar);
         for(let rule of grammar[0].rightSide){
             if(matchD(str, rule, grammar)){
                 strInput.target.style.borderColor = "ForestGreen";
@@ -163,12 +157,20 @@ export default function AutoFin() {
             }
         }
     };
-    
-    console.log(nodes);
-    console.log(transitions);
+
     return (
-        <div style={{ height: '100vh' }}>
-            <div style={{ height: '20%', borderBottom: '3px solid black' ,display: 'flex', justifyContent: 'space-between', padding: '0 2.5% 0 2.5%', alignItems: 'center' }}>
+        <Container maxWidth='lg' style={styles.container}>
+            <header style={styles.header}>
+            <Link style={styles.button} to="/" width="20px" height="40px">
+                <Tooltip title="Voltar"><Button style={styles.button}><ArrowBackIcon color="action"/></Button></Tooltip>
+            </Link>
+            
+            <p style={styles.text}>Autômato finito</p>
+            </header>
+            <Divider color="inherit" style={{ padding: '0.5px', width: '95%', alignSelf: 'center' }} />
+            
+            <div style={{ height: '20%' ,display: 'flex', justifyContent: 'space-between', padding: '0 2.5% 0 2.5%', alignItems: 'center' }}>
+                
                 <div>
                     <Button
                         variant='contained'
@@ -205,13 +207,8 @@ export default function AutoFin() {
                             variant='contained'
                             color='default'
                             onClick={() => {
-                                const tr = transitions.find(t => t.source === transitionInput.source && t.target === transitionInput.target);
-                                if(tr){
-                                    if(tr.label !== transitionInput.label){
-                                        tr.label = transitionInput.label
-                                        setTransitions([ ...transitions.filter(t => t.source !== tr.source || t.target !== tr.target), tr]);
-                                    }
-                                } else setTransitions([ ...transitions, transitionInput ]);
+                                const tr = transitions.find(t => t.source === transitionInput.source && t.target === transitionInput.target && t.label === transitionInput.label);
+                                if(!tr) setTransitions([ ...transitions, transitionInput ]);
                                 setTransitionInput({ source: '', target: '', label: 'λ' });
                             }}
                         >Adicionar transição</Button>
@@ -227,12 +224,13 @@ export default function AutoFin() {
                     </Button>
                 </div>
             </div>
+            <Divider color="inherit" style={{ padding: '0.5px', width: '95%', alignSelf: 'center' }} />
             <div style={{ height: '80%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ width: '20%', height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <div style={{width: '45%', float: 'left' }}>
-                        <div style={styles.main}>
+                    <div style={{width: '100%', float: 'left' }}>
+                        <div>
                             {inputs.map(() => (
-                                <div style={styles.item}>
+                                <div>
                                     <input type="text" placeholder="String" onChange={(strInput) => validate(strInput)} onClick={(strInput) => {validate(strInput); strInput.target.placeholder = "";}} style={styles.input}/>
                                 </div>
                             ))}
@@ -240,7 +238,7 @@ export default function AutoFin() {
                         <div style={styles.footer}>
                             <Tooltip title="Adicionar">
                                 <Button style={styles.button} onClick={() => {
-                                    if(inputs.length < 10)
+                                    if(inputs.length < 7)
                                         setInputs([...inputs, 1])
                                     }} > <AddOutlinedIcon color="action"/> </Button >
                             </Tooltip>
@@ -253,7 +251,7 @@ export default function AutoFin() {
                         </div>
                     </div>
                 </div>
-                <Graph 
+                <Graph
                     id='graph-id'
                     data={{
                         nodes: nodes,
@@ -261,13 +259,37 @@ export default function AutoFin() {
                     }}
                     config={myConfig}
                     onClickNode={onClickNode}
-                    onClickLink={onClickLink}
                 />
             </div>
-        </div>
+            <div style={styles.helper}>            
+                <HtmlTooltip placement="top"
+                    title={
+                    <React.Fragment>
+                        <Typography  color="inherit">Autômato finito </Typography>
+                        <b>{'Estado preto:'} </b>{'estado normal'} <br/>
+                        <b>{'Estado vermelho:'} </b>{'estado final'} <br/>
+                        <b>{'Losango:'} </b>{'estado inicial'} <br/>
+                        <br/> {'O estado inicial será o primeiro inserido.'} <br/>
+                        <br/>{'Em seguida, acrescente as strings para validar.'} <br/>
+                        {'Elas serão validadas quando são clicadas.'}                        
+                    </React.Fragment>
+                    }>
+                    <HelpOutlineIcon color="action" />
+                </HtmlTooltip>
+            </div>
+        </Container>
     )
 }
 
+const HtmlTooltip = withStyles((theme) => ({
+    tooltip: {
+      backgroundColor: '#f5f5f9',
+      color: 'rgba(0, 0, 0, 0.87)',
+      maxWidth: 420,
+      fontSize: theme.typography.pxToRem(12),
+      border: '1px solid #dadde9',
+    },
+  }))(Tooltip);
 
 const styles = {
     input: {
@@ -275,12 +297,45 @@ const styles = {
         borderColor: "black",
         borderStyle: "solid",
         borderRadius: "5px",
+        height: "30px",
+        width: "250px",
         outline: "0",
-        fontSize: "20px"
+        fontSize: "20px",
+        marginBottom: '10px'
+    },
+    helper: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginRight: '10px'
     },
     footer: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center'
+    },
+    container: {
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+    },
+    button: {
+        borderRadius: '5px',
+        height: '30px',
+        width: '20px',
+        transitionDuration: '0.5s',
+        marginRight: '10px'
+    },
+    header: {
+        paddingBottom: '15px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+    },
+    text: {
+        fontSize: '30px',
+        textAlign: 'center',
+        margin: '0'
     },
 };

@@ -117,7 +117,7 @@ const styles = {
         width: "250px",
         outline: "0",
         fontSize: "20px"
-     },
+    },
     button: {
         borderRadius: '5px',
         height: '30px',
