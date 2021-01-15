@@ -10,11 +10,11 @@ const Canvas = props => {
     const drawNode = (ctx, x, y, id) => {
         ctx.beginPath();
         ctx.arc(x, y, 25, 0, 2 * Math.PI);
-        ctx.fillText(`q${id}`, x, y);
+        ctx.fillText(`q${id}`, x - 12.5, y);
         ctx.stroke();
     }
 
-    const drawArrow = (ctx, x0, y0, x1, y1, arrowWidth, arrowLength, arrowStart, arrowEnd) => {
+    const drawArrow = (ctx, x0, y0, x1, y1, arrowWidth, arrowLength, arrowStart, arrowEnd, value) => {
         const dx = x1 - x0;
         const dy = y1 - y0;
         const angle = Math.atan2(dy,dx);
@@ -34,6 +34,7 @@ const Canvas = props => {
             ctx.lineTo(len, 0);
             ctx.lineTo(len - arrowLength, arrowWidth);
         }
+        ctx.fillText(value, (x0 + x1)/2 - 500, (y0 + y1)/2 - 250);
         ctx.stroke();
         ctx.setTransform(1,0,0,1,0,0);
     }
@@ -41,14 +42,23 @@ const Canvas = props => {
     useEffect(() => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, 2000, 2000);
         ctx.fillStyle = '#000000';
         ctx.font = '15px Arial';
+        console.log(nodes);
+        console.log(transitions);
         nodes.forEach(node => drawNode(ctx, node.x, node.y - 100, node.id));
         transitions.forEach(transition => {
-            const { id, targetId } = transition;
-            const node0 = nodes.find(node => node.id === parseInt(id));
-            const node1 = nodes.find(node => node.id === parseInt(targetId));
-            drawArrow(ctx, node0.x, node0.y - 100, node1.x, node1.y - 100, 5, 8, false, true);
+            const { start, finish, value } = transition;
+            const node0 = nodes.find(node => node.id === parseInt(start));
+            if(start === finish){
+                ctx.beginPath();
+                ctx.arc(node0.x, node0.y - 125, 25, 0, Math.PI, true);
+                ctx.stroke();
+            } else {
+                const node1 = nodes.find(node => node.id === parseInt(finish));
+                drawArrow(ctx, node0.x, node0.y - 100, node1.x, node1.y - 100, 5, 8, false, true, value);
+            }
         })
     }, [nodes, transitions]);
 
@@ -68,7 +78,7 @@ export default function Test() {
 
     const [nodes, setNodes] = useState([]);
     const [transitions, setTransitions] = useState([]);
-    const [input, setInput] = useState({id: '', targetId: ''});
+    const [input, setInput] = useState({start: '', finish: '', value: ''});
 
     const updateNodes = node => {
         if(nodes.length === 0){
@@ -83,19 +93,23 @@ export default function Test() {
         <div style={{ height: '100vh' }}>
             <div style={{ height: '15%', backgroundColor: 'purple' }}>
                 <input
-                    value={input.id}
-                    onChange={e => setInput({ ...input, id: e.target.value })}
+                    value={input.start}
+                    onChange={e => setInput({ ...input, start: e.target.value })}
                 />
                 <input
-                    value={input.targetId}
-                    onChange={e => setInput({ ...input, targetId: e.target.value })}
+                    value={input.finish}
+                    onChange={e => setInput({ ...input, finish: e.target.value })}
+                />
+                <input 
+                    value={input.value}
+                    onChange={e => setInput({ ...input, value: e.target.value })}
                 />
                 <Button
                     variant='contained'
                     color='primary'
                     onClick={() => {
                         setTransitions([ ...transitions, input ]);
-                        setInput({id: '', targetId: ''});
+                        setInput({start: '', finish: '', value: ''});
                     }}
                 >Submit</Button>
             </div>

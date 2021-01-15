@@ -44,6 +44,7 @@ const GrammarInput = ({grammar, leftSide, rightSide , cont}) => {
                 placeholder="RHS"
             />
 
+
             <Tooltip title="Adicionar caractere vazio: λ">
                 <Button id={cont} style={styles.button} onClick={(e) => {
                     const buttonId = e.currentTarget.getAttribute('id');
@@ -78,7 +79,6 @@ export default function Gramatica() {
             return temp;
         });
         const res = [];
-        //console.log(grammarInputs);
         let type = '';
         arr.forEach(row => {
             row.rightSide.forEach(rule => {
