@@ -14,7 +14,6 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 export default function Regex() {
     const [userInput, setUserInput] = useState('');
-    const [correct, setCorrect] = useState(false);
     const [inputs, setInputs] = useState([1]);
 
     const validate = e => {
@@ -81,7 +80,8 @@ export default function Regex() {
                         <b>{'  |'}</b> {' união'} <br/>
                         <b>{'  {x}'}</b> {' x repetições'} <br/>
                         <b>{'  {x, y}'}</b> {' entre x e y repetições'} <br/><br/>
-                        {'Acrescente as strings para testar.'}                        
+                        {'Acrescente as strings para testar.'}<br/>
+                        {'Elas serão validadas quando são clicadas.'}                           
                     </React.Fragment>
                     }>
                     <HelpOutlineIcon color="action" />

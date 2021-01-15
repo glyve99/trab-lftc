@@ -21,7 +21,7 @@ export default function Home() {
             {renderRedirect()}
             <div style={styles.menu}>
                 <Button style={styles.button} onClick={() => setRedirectFlag('regex')}>Expressões regulares</Button>
-                <Button style={styles.button}>Gramáticas</Button>
+                <Button style={styles.button} onClick={() => setRedirectFlag('gramatica')}>Gramáticas</Button>
                 <Button style={styles.button} onClick={() => setRedirectFlag('autofin')}>Autômatos finitos</Button>
             </div>
             <p style={styles.text}>
