@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/trab-lftc/static/css/main.6dea0f05.chunk.css",
-    "main.js": "/trab-lftc/static/js/main.5004f5dd.chunk.js",
-    "main.js.map": "/trab-lftc/static/js/main.5004f5dd.chunk.js.map",
+    "main.js": "/trab-lftc/static/js/main.043c0f0f.chunk.js",
+    "main.js.map": "/trab-lftc/static/js/main.043c0f0f.chunk.js.map",
     "runtime-main.js": "/trab-lftc/static/js/runtime-main.e7e9e0b0.js",
     "runtime-main.js.map": "/trab-lftc/static/js/runtime-main.e7e9e0b0.js.map",
     "static/js/2.3fa300db.chunk.js": "/trab-lftc/static/js/2.3fa300db.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.e7e9e0b0.js",
     "static/js/2.3fa300db.chunk.js",
     "static/css/main.6dea0f05.chunk.css",
-    "static/js/main.5004f5dd.chunk.js"
+    "static/js/main.043c0f0f.chunk.js"
   ]
 }
