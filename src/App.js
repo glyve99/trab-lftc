@@ -7,7 +7,7 @@ import AutoFin from './components/pages/AutoFin';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={window.location.pathname || ''}>
       <Switch>
         <Route exact path='/' component={Home} />
         <Route path='/gramatica' component={Gramatica} />

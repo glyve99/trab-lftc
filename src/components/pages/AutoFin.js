@@ -58,9 +58,13 @@ export default function AutoFin() {
                     else node.color = 'red';
                 };
                 return node;
-            }))
-        }
+            }));
+        };
     };
+
+    const onClickLink = (source, target) => {
+        if(deleteMode) setTransitions(transitions.filter(t => t.source !== source || t.target !== target));
+    }
 
     const validate = strInput => {
         let charCode = 65;
@@ -259,6 +263,7 @@ export default function AutoFin() {
                     }}
                     config={myConfig}
                     onClickNode={onClickNode}
+                    onClickLink={onClickLink}
                 />
             </div>
             <div style={styles.helper}>            
